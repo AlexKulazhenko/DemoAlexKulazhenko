@@ -6,38 +6,54 @@ import './App.css';
 
 class App extends Component{
   state ={
-      posts: [],
-      loading: true,
-      comments: []
+      count: 0,
+      isCounting: false
   }
 
-  
-
   componentDidMount(){
-    console.log('componentDidMount')
-    fetch('https://jsonplaceholder.typicode.com/posts')
-      .then(response => response.json())
-      .then(data => this.setState({posts: data, loading: false}))
-      this.timerId = setInterval(() => {
-        fetch('https://jsonplaceholder.typicode.com/comments')
-        .then(response=>response.json())
-        .then(data=>this.setState({comments: data}))
-      }, 3000)
+    const userCount = localStorage.getItem('timer')
+    if(userCount){
+      this.setState({count: +userCount})
+    }
   }
 
   componentDidUpdate(){
-    console.log('componentDidUpdate')  
+    localStorage.setItem('timer', this.state.count)
   }
 
   componentWillUnmount(){
-    clearInterval(this.timerId)
+    clearInterval(this.counterId);
+  }
+
+  handleStart = () => {
+    this.setState({isCounting: true})
+
+    this.counterId = setInterval(()=>{
+      this.setState({count: this.state.count +1})},1000)
+  }
+
+  handleStop = () => {
+    this.setState({ isCounting: false});
+    clearInterval(this.counterId);
+  }
+
+  reset = () => {
+    this.setState({isCouting: false, count: this.state.count = 0 })
+    clearInterval(this.counterId)
   }
 
 
   render(){
     return (
       <div style={{textAlign: 'center'}}>
-        {this.state.loading ? <h3>Loading...</h3> : <h3>{this.state.posts.length} was loading</h3>}
+        <h1>React Timer</h1>
+        <h3>{this.state.count}</h3>
+        {!this.state.isCounting ?
+          <button onClick={this.handleStart}>Start</button>
+          :
+          <button onClick={this.handleStop}>Stop</button>
+        }
+        <button onClick={this.reset}>Reset</button>
       </div>
     );
   } 
